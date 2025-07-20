@@ -21,6 +21,13 @@ html, body {
     overflow: hidden;
 }
 
+/* Remove unwanted list markers in sidebar navigation */
+#main-nav ul, #main-nav li {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
 /* Sidebar icon styling */
 .sidebar-icon {
     width: 20px !important;
@@ -34,7 +41,7 @@ html, body {
 .nav-link {
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
     gap: 0.75rem;
     padding: 0.5rem;
     border-radius: 0.375rem;
@@ -45,6 +52,12 @@ html, body {
     text-decoration: none;
     min-height: 40px;
     width: 100%;
+}
+
+/* Navigation text */
+.nav-text {
+    font-size: 0.875rem;
+    white-space: nowrap;
 }
 
 .nav-link:not(.active):hover {
@@ -98,6 +111,62 @@ html, body {
 
 .time-nav-btn:active {
     background-color: #e5e7eb;
+}
+
+/* Position input styling */
+.position-input {
+    transition: box-shadow 0.2s, border-color 0.2s;
+}
+
+.position-input:hover {
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+}
+
+.position-input:focus {
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+    outline: none;
+}
+
+/* Frame navigation styling */
+.frame-input {
+    transition: box-shadow 0.2s, border-color 0.2s;
+}
+
+.frame-input:focus {
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+    outline: none;
+}
+
+.frame-nav-btn {
+    transition: background-color 0.2s, border-color 0.2s;
+}
+
+.frame-nav-btn:hover {
+    background-color: #e5e7eb !important;
+}
+
+.frame-nav-btn:active {
+    background-color: #d1d5db !important;
+}
+
+/* Measurement dropdown styling */
+.measurement-dropdown {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right 0.5rem center;
+    background-repeat: no-repeat;
+    background-size: 1.5em 1.5em;
+    padding-right: 2.5rem;
+    cursor: pointer;
+}
+
+.measurement-dropdown:hover {
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+}
+
+.measurement-dropdown:focus {
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+    outline: none;
 }
 
 /* Micropattern cells */
@@ -339,6 +408,10 @@ button:focus {
     border-radius: 0.375rem;
 }
 
+.rounded-full {
+    border-radius: 9999px;
+}
+
 /* Shadows */
 .shadow-sm {
     box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
@@ -459,6 +532,10 @@ button:focus {
 
 .max-w-full {
     max-width: 100%;
+}
+
+.max-w-24 {
+    max-width: 6rem;
 }
 
 .max-h-full {

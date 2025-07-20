@@ -1,5 +1,5 @@
 use dioxus::prelude::*;
-use super::{PatternState, PatternStatus};
+use super::{PatternState, PatternStatus, ConfirmButton, RejectButton};
 
 #[component]
 pub fn DetailPanel(
@@ -44,13 +44,11 @@ pub fn DetailPanel(
                             },
                             None if pattern_state.has_cell => rsx! {
                                 div { class: "mt-4 flex gap-2",
-                                    button { 
-                                        class: "flex-1 bg-green-600 hover:bg-green-700 text-white text-sm py-2 px-2 rounded-md shadow-sm transition-colors",
+                                    ConfirmButton { 
                                         onclick: move |_| on_pattern_state_change.call((pattern_id, PatternStatus::Confirmed)),
                                         "Confirm as ROI"
                                     }
-                                    button { 
-                                        class: "flex-1 bg-red-600 hover:bg-red-700 text-white text-sm py-2 px-2 rounded-md shadow-sm transition-colors",
+                                    RejectButton { 
                                         onclick: move |_| on_pattern_state_change.call((pattern_id, PatternStatus::Rejected)),
                                         "Reject"
                                     }

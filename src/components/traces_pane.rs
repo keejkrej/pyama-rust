@@ -1,4 +1,5 @@
 use dioxus::prelude::*;
+use super::ExportButton;
 
 #[component]
 pub fn TracesPane() -> Element {
@@ -8,7 +9,10 @@ pub fn TracesPane() -> Element {
             div { class: "flex-1 bg-white rounded-lg p-4 border border-gray-200 flex flex-col shadow-sm",
                 div { class: "flex justify-between items-center mb-4",
                     h3 { class: "font-semibold text-gray-900", "Fluorescence Timelapses (45 cells)" }
-                    button { class: "bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg text-sm transition-colors shadow-sm hover:shadow-md flex items-center gap-2",
+                    ExportButton { 
+                        onclick: move |_| {
+                            // Export logic would go here
+                        },
                         svg { 
                             class: "w-4 h-4", 
                             fill: "none", 

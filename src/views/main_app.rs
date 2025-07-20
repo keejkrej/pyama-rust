@@ -9,6 +9,8 @@ pub fn MainApp() -> Element {
     let mut active_view = use_signal(|| ActiveView::Viewer);
     let mut selected_channel = use_signal(|| Channel::PhaseContrast);
     let mut current_timepoint = use_signal(|| 1);
+    let mut current_position = use_signal(|| 1);
+    let mut current_frame = use_signal(|| 1);
     let mut selected_pattern = use_signal(|| None::<usize>);
     let mut pattern_states = use_signal(|| {
         // Initialize 64 patterns (8x8 grid)
@@ -21,6 +23,8 @@ pub fn MainApp() -> Element {
     });
 
     let max_timepoint = 100;
+    let max_position = 10;
+    let max_frame = 500;
 
     rsx! {
         div { class: "h-screen flex flex-col",
@@ -40,10 +44,16 @@ pub fn MainApp() -> Element {
                                 selected_channel: selected_channel(),
                                 current_timepoint: current_timepoint(),
                                 max_timepoint,
+                                current_position: current_position(),
+                                max_position,
+                                current_frame: current_frame(),
+                                max_frame,
                                 selected_pattern: selected_pattern(),
                                 pattern_states: pattern_states.read().clone(),
                                 on_channel_change: move |channel| selected_channel.set(channel),
                                 on_timepoint_change: move |timepoint| current_timepoint.set(timepoint),
+                                on_position_change: move |position| current_position.set(position),
+                                on_frame_change: move |frame| current_frame.set(frame),
                                 on_pattern_select: move |pattern_id| selected_pattern.set(Some(pattern_id)),
                                 on_pattern_state_change: move |(pattern_id, status): (usize, PatternStatus)| {
                                     pattern_states.with_mut(|states| {
@@ -52,7 +62,6 @@ pub fn MainApp() -> Element {
                                         }
                                     });
                                 },
-                                on_switch_to_traces: move |_| active_view.set(ActiveView::Traces),
                             }
                         },
                         ActiveView::Traces => rsx! {

@@ -18,6 +18,9 @@ pub use pattern_cell::PatternCell;
 mod detail_panel;
 pub use detail_panel::DetailPanel;
 
+mod buttons;
+pub use buttons::*;
+
 mod viewer_pane;
 pub use viewer_pane::ViewerPane;
 
