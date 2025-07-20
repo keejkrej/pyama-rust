@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PyAMA - UI Prototype</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styles for a more polished look */
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .sidebar-icon {
+            width: 20px;
+            height: 20px;
+            flex-shrink: 0; /* Prevents icons from shrinking */
+        }
+        .main-content {
+            display: none;
+            height: 100%;
+            overflow-y: auto;
+        }
+        .main-content.active {
+            display: flex; /* Use flex to enable flex-col layouts */
+        }
+        /* Style for the micropattern grid */
+        .micropattern-grid {
+            display: grid;
+            /* Adjust grid columns dynamically if needed, for now fixed at 8 */
+            grid-template-columns: repeat(8, 1fr);
+            gap: 0.5rem;
+        }
+        .micropattern-cell {
+            aspect-ratio: 1 / 1;
+            transition: transform 0.1s, box-shadow 0.1s;
+            border: 2px solid transparent;
+            border-radius: 0.5rem;
+        }
+        .micropattern-cell:hover {
+            transform: scale(1.05);
+            z-index: 10;
+        }
+        /* State-based styling for micropatterns */
+        .micropattern-cell.selected {
+            box-shadow: 0 0 0 3px #4f46e5; /* indigo-600 */
+            z-index: 20;
+        }
+        .micropattern-cell.confirmed {
+            border-color: #16a34a; /* green-600 */
+        }
+        .micropattern-cell.rejected {
+            border-color: #dc2626; /* red-600 */
+        }
+
+        /* Visual feedback for view change */
+        @keyframes flash-animation {
+            from { background-color: #e0e7ff; } /* A light indigo color */
+            to { background-color: transparent; }
+        }
+        .flash {
+            animation: flash-animation 0.3s ease-out;
+        }
+    </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-gray-100 text-gray-800 antialiased">
+
+    <!-- Screen 1: Welcome Screen -->
+    <div id="welcome-screen" class="flex items-center justify-center h-screen">
+        <div class="text-center p-8 bg-white rounded-lg shadow-2xl w-full max-w-md border border-gray-200">
+            <div class="flex justify-center items-center mb-4">
+                <svg class="w-12 h-12 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 3.104l7.5 7.5-7.5 7.5"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 3v18"></path></svg>
+            </div>
+            <h1 class="text-3xl font-bold text-gray-900 mb-2">PyAMA</h1>
+            <p class="text-gray-500 mb-8">Python-based Automated Microstructure Analysis</p>
+            <div class="space-y-4">
+                <button onclick="showMainApp()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-lg transition-colors shadow-sm hover:shadow-md">Create New Project</button>
+                <button onclick="showMainApp()" class="w-full bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-3 px-4 rounded-lg transition-colors">Open Existing Project</button>
+            </div>
+            <div class="mt-8 text-left">
+                <h2 class="text-lg font-semibold text-gray-600 mb-3">Recent Projects</h2>
+                <ul class="space-y-2">
+                    <li class="cursor-pointer hover:bg-gray-100 p-2 rounded-md transition-colors text-gray-700" onclick="showMainApp()">siRNA_knockdown_exp1</li>
+                    <li class="cursor-pointer hover:bg-gray-100 p-2 rounded-md transition-colors text-gray-700" onclick="showMainApp()">Drug_response_trial_3</li>
+                    <li class="cursor-pointer hover:bg-gray-100 p-2 rounded-md transition-colors text-gray-700" onclick="showMainApp()">Control_group_2024-07-15</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Application Interface -->
+    <div id="main-app" class="hidden h-screen flex flex-col">
+        <!-- Top Bar -->
+        <header class="bg-white border-b border-gray-200 px-4 py-3">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <div class="project-info">
+                        <span class="text-sm text-gray-600">Project:</span>
+                        <span class="text-sm font-semibold text-indigo-600 hover:underline cursor-pointer">siRNA_knockdown_exp1</span>
+                    </div>
+                </div>
+                <div class="flex items-center">
+                    <button onclick="showWelcomeScreen()" class="flex items-center gap-2 py-2 px-3 rounded-md text-gray-500 hover:bg-gray-100 hover:text-gray-900 transition-colors text-sm">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                        Close Project
+                    </button>
+                </div>
+            </div>
+        </header>
+        
+        <div class="flex flex-1 overflow-hidden">
+            <!-- Left Panel: Navigation -->
+            <aside id="sidebar" class="w-20 bg-white/80 backdrop-blur-sm p-4 flex flex-col border-r border-gray-200 transition-all duration-300">
+                <div class="sidebar-content">
+                    <nav id="main-nav">
+                        <ul class="space-y-2 items-center">
+                            <li><a href="#" class="nav-link active" onclick="switchToViewer()" title="Viewer">
+                                <svg class="sidebar-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.536L16.732 3.732z"></path></svg>
+                                <span class="nav-text hidden">Viewer</span>
+                            </a></li>
+                            <li><a href="#" class="nav-link" onclick="switchToTraces()" title="Traces">
+                               <svg class="sidebar-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a2 2 0 01-2 2H6a2 2 0 01-2-2V4z"></path></svg>
+                                <span class="nav-text hidden">Traces</span>
+                            </a></li>
+                        </ul>
+                    </nav>
+                </div>
+            </aside>
+
+            <!-- Center Panel: Main Content -->
+            <main class="flex-1 bg-gray-100">
+                <!-- ROI Curation View -->
+                <div id="roi-curation" class="main-content active p-6 flex-col">
+                    <div class="flex-none">
+                        <div class="flex justify-between items-center mb-4">
+                            <h1 class="text-3xl font-bold text-gray-900">Viewer</h1>
+                            <button onclick="switchToTraces()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-lg transition-colors shadow-sm hover:shadow-md flex items-center gap-2">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                                Run Extraction & View Traces
+                            </button>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4 mb-4 bg-white p-3 rounded-lg border border-gray-200 shadow-sm">
+                            <div>
+                                <label for="measurement-select" class="text-sm font-medium text-gray-600 block mb-1">Measurement</label>
+                                <select id="measurement-select" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2">
+                                    <option selected>Position 1</option>
+                                    <option>Position 2</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="text-sm font-medium text-gray-600 block mb-1">Channel</label>
+                                <div class="flex gap-2">
+                                    <button class="channel-btn active flex-1">Phase Contrast</button>
+                                    <button class="channel-btn flex-1">Fluorescence</button>
+                                    <button class="channel-btn flex-1">Segmentation</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex-1 grid grid-cols-4 gap-4 overflow-hidden">
+                        <div class="col-span-3 bg-white rounded-lg p-4 border border-gray-200 flex flex-col shadow-sm">
+                            <div class="micropattern-grid flex-1 overflow-y-auto pr-2">
+                                <!-- Grid cells generated by JS -->
+                            </div>
+                            <div class="flex-none pt-4 flex items-center justify-center gap-4">
+                                <button id="time-first" class="time-nav-btn">&lt;&lt;</button>
+                                <button id="time-prev" class="time-nav-btn">&lt;</button>
+                                <div class="text-sm font-medium text-gray-600 px-4">Timepoint: <span id="time-label">1</span> / 100</div>
+                                <button id="time-next" class="time-nav-btn">&gt;</button>
+                                <button id="time-last" class="time-nav-btn">&gt;&gt;</button>
+                            </div>
+                        </div>
+                        
+                        <div id="detail-panel" class="col-span-1 bg-white rounded-lg p-4 flex flex-col border border-gray-200 shadow-sm">
+                            <h3 class="font-semibold text-gray-900 mb-3">Micropattern Details</h3>
+                            <div class="flex-1 flex items-center justify-center bg-gray-900 rounded-md mb-3">
+                                <img id="detail-image" src="https://placehold.co/256x256/111827/4b5563?text=Select+a+pattern&font=inter" class="max-w-full max-h-full object-contain" alt="Selected micropattern">
+                            </div>
+                            <div id="detail-info" class="text-center">
+                                <p class="text-sm text-gray-500">No pattern selected.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Extraction & Export View -->
+                <div id="extraction" class="main-content p-6 flex-col">
+                    <h1 class="text-3xl font-bold text-gray-900 mb-4">Extracted Traces</h1>
+                    <div class="flex-1 bg-white rounded-lg p-4 border border-gray-200 flex flex-col shadow-sm">
+                         <div class="flex justify-between items-center mb-4">
+                            <h3 class="font-semibold text-gray-900">Fluorescence Timelapses (45 cells)</h3>
+                            <button class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg text-sm transition-colors shadow-sm hover:shadow-md flex items-center gap-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                                Export as CSV
+                            </button>
+                        </div>
+                        <div class="flex-1 rounded-md bg-gray-50 p-4">
+                             <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" class="text-gray-400" preserveAspectRatio="none" viewBox="0 0 700 300">
+                                <line x1="50" y1="280" x2="680" y2="280" stroke="currentColor" stroke-width="2"/>
+                                <line x1="50" y1="20" x2="50" y2="280" stroke="currentColor" stroke-width="2"/>
+                                <text x="365" y="298" text-anchor="middle" style="font-size:12px; fill:currentColor;">Time</text>
+                                <text x="15" y="150" text-anchor="middle" transform="rotate(-90 15,150)" style="font-size:12px; fill:currentColor;">Fluorescence</text>
+                                <path d="M 50 250 C 150 100, 250 300, 350 150 S 550 50, 650 200" stroke="#a78bfa" fill="none" stroke-width="1.5" opacity="0.7"/>
+                                <path d="M 50 200 C 150 150, 250 250, 350 200 S 550 100, 650 150" stroke="#7dd3fc" fill="none" stroke-width="1.5" opacity="0.7"/>
+                                <path d="M 50 150 C 150 200, 250 100, 350 250 S 550 150, 650 100" stroke="#fca5a5" fill="none" stroke-width="1.5" opacity="0.7"/>
+                                <path d="M 50 180 C 150 280, 250 80, 350 180 S 550 280, 650 80" stroke="#fdba74" fill="none" stroke-width="1.5" opacity="0.7"/>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+        <footer class="bg-gray-200 border-t border-gray-300 p-2 text-xs text-gray-600 text-center">Status: Idle</footer>
+    </div>
+
+    <script>
+        // --- Basic Navigation Logic ---
+        const welcomeScreen = document.getElementById('welcome-screen');
+        const mainApp = document.getElementById('main-app');
+        
+        function showMainApp() {
+            welcomeScreen.style.display = 'none';
+            mainApp.style.display = 'flex';
+            switchToViewer();
+        }
+
+        function showWelcomeScreen() {
+            mainApp.style.display = 'none';
+            welcomeScreen.style.display = 'flex';
+        }
+
+        function flash(element) {
+            element.classList.add('flash');
+            setTimeout(() => {
+                element.classList.remove('flash');
+            }, 300);
+        }
+
+        function switchToViewer() {
+            document.getElementById('extraction').classList.remove('active');
+            const viewerPane = document.getElementById('roi-curation');
+            viewerPane.classList.add('active');
+            flash(viewerPane);
+            
+            document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
+            document.querySelector('.nav-link[onclick="switchToViewer()"]').classList.add('active');
+            
+            initializeRoiView();
+        }
+        
+        function switchToTraces() {
+            document.getElementById('roi-curation').classList.remove('active');
+            const tracesPane = document.getElementById('extraction');
+            tracesPane.classList.add('active');
+            flash(tracesPane);
+
+            document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
+            document.querySelector('.nav-link[onclick="switchToTraces()"]').classList.add('active');
+        }
+        
+        const style = document.createElement('style');
+        style.innerHTML = `
+            .nav-link.active{background-color:#eef2ff;color:#4338ca;font-weight:600;}
+            .nav-link{display:flex;align-items:center;gap:0.75rem;padding:0.5rem 0.75rem;border-radius:0.375rem;transition:background-color 0.2s,color 0.2s;color:#4b5563;font-weight:500;cursor:pointer;}
+            .nav-link:not(.active):hover{background-color:#f3f4f6;color:#111827;}
+            .channel-btn{padding:0.5rem;font-size:0.875rem;border-radius:0.375rem;border:1px solid #d1d5db;background-color:white;transition:all 0.2s;}
+            .channel-btn:hover{background-color:#f9fafb;}
+            .channel-btn.active{background-color:#4f46e5;color:white;border-color:#4f46e5;}
+            .time-nav-btn{padding:0.25rem 0.75rem;font-size:1rem;font-weight:600;border-radius:0.375rem;border:1px solid #d1d5db;background-color:white;transition:all 0.2s;}
+            .time-nav-btn:hover{background-color:#f3f4f6;}
+            .time-nav-btn:active{background-color:#e5e7eb;}
+        `;
+        document.head.appendChild(style);
+
+        // --- ROI Curation View Logic ---
+        const gridContainer = document.querySelector('.micropattern-grid');
+        const detailImage = document.getElementById('detail-image');
+        const detailInfo = document.getElementById('detail-info');
+        const timeLabel = document.getElementById('time-label');
+        
+        let micropatternStates = {}; // Store states like 'confirmed', 'rejected'
+
+        function initializeRoiView() {
+            if (gridContainer.children.length > 0) return; // Already initialized
+
+            for (let i = 0; i < 64; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'micropattern-cell cursor-pointer bg-gray-900 rounded-md flex items-center justify-center';
+                cell.dataset.id = i;
+                
+                const hasCell = Math.random() > 0.4;
+                cell.dataset.hasCell = hasCell;
+                
+                const img = document.createElement('img');
+                img.src = hasCell 
+                    ? `https://placehold.co/64x64/111827/a7f3d0?text=&font=inter`
+                    : `https://placehold.co/64x64/111827/4b5563?text=&font=inter`;
+                img.className = 'w-full h-full object-cover rounded-md';
+                cell.appendChild(img);
+
+                cell.addEventListener('click', () => selectPattern(cell));
+                gridContainer.appendChild(cell);
+            }
+            
+            document.getElementById('time-first').addEventListener('click', () => updateTime(1));
+            document.getElementById('time-prev').addEventListener('click', () => updateTime(currentTimepoint - 1));
+            document.getElementById('time-next').addEventListener('click', () => updateTime(currentTimepoint + 1));
+            document.getElementById('time-last').addEventListener('click', () => updateTime(maxTimepoint));
+        }
+        
+        let currentTimepoint = 1;
+        const maxTimepoint = 100;
+        function updateTime(newTime) {
+            if (newTime >= 1 && newTime <= maxTimepoint) {
+                currentTimepoint = newTime;
+                timeLabel.textContent = currentTimepoint;
+            }
+        }
+
+        function selectPattern(cellElement) {
+            document.querySelectorAll('.micropattern-cell.selected').forEach(el => el.classList.remove('selected'));
+            cellElement.classList.add('selected');
+
+            const id = cellElement.dataset.id;
+            const hasCell = cellElement.dataset.hasCell === 'true';
+            const patternId = `P1-R${Math.floor(id / 8) + 1}-C${(id % 8) + 1}`;
+            const state = micropatternStates[id];
+
+            detailImage.src = hasCell
+                ? `https://placehold.co/256x256/111827/a7f3d0?text=Cell&font=inter`
+                : `https://placehold.co/256x256/111827/4b5563?text=Empty&font=inter`;
+            
+            let statusHTML = '';
+            if (state === 'confirmed') {
+                statusHTML = `<div class="mt-4 p-2 text-sm font-semibold text-green-800 bg-green-100 rounded-md">Status: Confirmed ROI</div>`;
+            } else if (state === 'rejected') {
+                statusHTML = `<div class="mt-4 p-2 text-sm font-semibold text-red-800 bg-red-100 rounded-md">Status: Rejected</div>`;
+            } else if (hasCell) {
+                statusHTML = `
+                <div class="mt-4 flex gap-2">
+                    <button onclick="updatePatternState('${id}', 'confirmed')" class="flex-1 bg-green-600 hover:bg-green-700 text-white text-sm py-2 px-2 rounded-md shadow-sm">Confirm as ROI</button>
+                    <button onclick="updatePatternState('${id}', 'rejected')" class="flex-1 bg-red-600 hover:bg-red-700 text-white text-sm py-2 px-2 rounded-md shadow-sm">Reject</button>
+                </div>
+                `;
+            }
+
+            detailInfo.innerHTML = `
+                <h4 class="font-bold text-lg">${patternId}</h4>
+                <p class="text-sm ${hasCell ? 'text-green-600' : 'text-gray-500'}">${hasCell ? 'Cell Detected' : 'Empty'}</p>
+                ${statusHTML}
+            `;
+        }
+
+        function updatePatternState(id, newState) {
+            micropatternStates[id] = newState;
+            const cellElement = document.querySelector(`.micropattern-cell[data-id='${id}']`);
+            
+            cellElement.classList.remove('confirmed', 'rejected');
+            if (newState === 'confirmed') {
+                cellElement.classList.add('confirmed');
+            } else if (newState === 'rejected') {
+                cellElement.classList.add('rejected');
+            }
+            
+            // Reselect to update the detail view
+            selectPattern(cellElement);
+        }
+
+        document.querySelectorAll('.channel-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.channel-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+            });
+        });
+
+    </script>
+</body>
+</html>
