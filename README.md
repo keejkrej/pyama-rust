@@ -6,12 +6,9 @@ This project is a Rust implementation of PyAMA (Python Automated Microscopy Anal
 
 ```
 pyama-rust/
-├─ assets/ # Static assets including CSS and images
+├─ assets/ # Static assets including images
 │  ├─ favicon.ico
-│  ├─ header.svg
-│  ├─ tailwind.css
-│  └─ styling/
-│     └─ main.css
+│  └─ header.svg
 ├─ prototype/ # HTML prototype for UI design
 │  └─ index.html
 ├─ src/
@@ -31,15 +28,6 @@ pyama-rust/
 │     └─ main_app.rs # Main application interface
 ├─ Cargo.toml # Project dependencies and configuration
 └─ Dioxus.toml # Dioxus-specific configuration
-```
-
-### Tailwind
-1. Install npm: https://docs.npmjs.com/downloading-and-installing-node-js-and-npm
-2. Install the Tailwind CSS CLI: https://tailwindcss.com/docs/installation
-3. Run the following command in the root of the project to start the Tailwind CSS compiler:
-
-```bash
-npx tailwindcss -i ./tailwind.css -o ./assets/tailwind.css --watch
 ```
 
 ### Serving Your App

@@ -9,6 +9,17 @@ edition = "2021"
 [dependencies]
 dioxus = { version = "0.6.0", features = ["router", "fullstack"] }
 fastrand = "2.3.0"
+gloo-timers = { version = "0.3.0", features = ["futures"] }
+tokio = { version = "1.0", features = ["full"] }
+anyhow = "1.0"
+ndarray = { version = "0.16", features = ["serde"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+clap = { version = "4.0", features = ["derive"] }
+rfd = "0.14"
+
+[dev-dependencies]
+tempfile = "3.8"
 
 [features]
 default = ["desktop"]
